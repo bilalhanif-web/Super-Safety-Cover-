@@ -19,17 +19,17 @@ export const FinalCTA: React.FC = () => {
           Find the right protection for your everyday essentials. Cash on Delivery nationwide with prompt support.
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-md mx-auto sm:max-w-none">
           <Link
             href="/best-sellers"
-            className="inline-flex items-center gap-2 bg-[#66743A] text-white px-8 py-4 rounded-md text-sm sm:text-base font-bold hover:bg-[#566230] transition-colors shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#66743A] text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-md text-sm sm:text-base font-bold hover:bg-[#566230] transition-colors shadow-sm"
           >
             <span>Shop All Products</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/bike-covers"
-            className="inline-flex items-center gap-2 bg-[#1A1A1A] text-[#F4F3ED] border border-[#333333] px-7 py-4 rounded-md text-sm sm:text-base font-bold hover:text-[#66743A] hover:border-[#66743A] transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#1A1A1A] text-[#F4F3ED] border border-[#333333] px-6 sm:px-7 py-3.5 sm:py-4 rounded-md text-sm sm:text-base font-bold hover:text-[#66743A] hover:border-[#66743A] transition-colors"
           >
             <span>Explore Bike Covers</span>
           </Link>

@@ -92,17 +92,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
       </Link>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-1 justify-between">
+      <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between">
         <div>
           {/* Category & Rating */}
           <div className="flex items-center justify-between gap-1 mb-1.5">
-            <span className="text-[11px] font-semibold text-brand-grey uppercase tracking-wider">
+            <span className="text-[10px] sm:text-[11px] font-semibold text-brand-grey uppercase tracking-wider truncate">
               {product.categoryName}
             </span>
-            <div className="flex items-center gap-1 text-xs font-semibold text-brand-black">
-              <Star className="w-3.5 h-3.5 fill-current text-olive" />
+            <div className="flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-brand-black shrink-0">
+              <Star className="w-3 sm:w-3.5 h-3 sm:h-3.5 fill-current text-olive" />
               <span>{product.rating.toFixed(1)}</span>
-              <span className="text-brand-grey font-normal text-[11px]">
+              <span className="text-brand-grey font-normal text-[10px] sm:text-[11px]">
                 ({product.reviewsCount})
               </span>
             </div>
@@ -111,7 +111,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           {/* Product Name */}
           <Link
             href={`/product/${product.slug}`}
-            className="block text-sm font-bold text-brand-black hover:text-olive transition-colors line-clamp-2 mb-2"
+            className="block text-xs sm:text-sm font-bold text-brand-black hover:text-olive transition-colors line-clamp-2 mb-2"
           >
             {product.name}
           </Link>
@@ -119,12 +119,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
 
         <div>
           {/* Price */}
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-base sm:text-lg font-extrabold text-brand-black">
+          <div className="flex items-baseline gap-1.5 sm:gap-2 mb-2.5 sm:mb-3">
+            <span className="text-sm sm:text-lg font-extrabold text-brand-black">
               Rs. {product.price.toLocaleString()}
             </span>
             {product.compareAtPrice && (
-              <span className="text-xs sm:text-sm text-brand-grey line-through font-normal">
+              <span className="text-[11px] sm:text-sm text-brand-grey line-through font-normal">
                 Rs. {product.compareAtPrice.toLocaleString()}
               </span>
             )}
@@ -134,7 +134,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           <button
             type="button"
             onClick={handleQuickAdd}
-            className={`w-full py-2.5 px-3 rounded-md text-xs font-bold flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-[0.98] ${
+            className={`w-full py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-md text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-[0.98] ${
               added
                 ? "bg-brand-black text-white"
                 : "bg-olive text-white hover:bg-olive-hover"

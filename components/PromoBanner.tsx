@@ -9,7 +9,7 @@ export const PromoBanner: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-2xl md:rounded-3xl border border-[#D8D2C5] shadow-xs overflow-hidden grid grid-cols-1 lg:grid-cols-12 items-center">
           {/* Content (Left) */}
-          <div className="p-7 sm:p-10 lg:p-12 lg:col-span-6 xl:col-span-5">
+          <div className="p-5 sm:p-8 lg:p-12 lg:col-span-6 xl:col-span-5">
             {/* Badge */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F4F3ED] border border-[#D8D2C5] text-xs font-semibold text-[#66743A] mb-4">
               <ShieldCheck className="w-3.5 h-3.5 text-[#66743A]" />

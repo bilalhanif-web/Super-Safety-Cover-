@@ -23,7 +23,7 @@ export const CartDrawer: React.FC = () => {
       {/* Drawer */}
       <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-brand-lightgrey">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-brand-lightgrey">
           <div className="flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-olive" />
             <h2 className="text-base font-bold text-brand-black">
@@ -41,13 +41,13 @@ export const CartDrawer: React.FC = () => {
         </div>
 
         {/* Free Shipping / COD banner */}
-        <div className="bg-brand-offwhite px-6 py-2.5 border-b border-brand-lightgrey flex items-center gap-2 text-xs font-medium text-brand-black">
+        <div className="bg-brand-offwhite px-4 sm:px-6 py-2.5 border-b border-brand-lightgrey flex items-center gap-2 text-xs font-medium text-brand-black">
           <ShieldCheck className="w-4 h-4 text-olive shrink-0" />
           <span>Cash on Delivery available on this order</span>
         </div>
 
         {/* Items List */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-8">
               <div className="w-16 h-16 rounded-full bg-brand-offwhite border border-brand-lightgrey flex items-center justify-center text-brand-grey mb-4">
@@ -163,7 +163,7 @@ export const CartDrawer: React.FC = () => {
 
         {/* Footer Subtotal & Checkout */}
         {cart.length > 0 && (
-          <div className="p-6 border-t border-brand-lightgrey bg-white">
+          <div className="p-4 sm:p-6 border-t border-brand-lightgrey bg-white">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-brand-grey">Subtotal</span>
               <span className="text-base font-extrabold text-brand-black">

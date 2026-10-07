@@ -19,7 +19,7 @@ export const CategorySection: React.FC = () => {
         </div>
 
         {/* 8 Categories Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.id}

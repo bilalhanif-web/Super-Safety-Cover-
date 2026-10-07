@@ -38,7 +38,7 @@ export const FAQSection: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => toggle(idx)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-brand-black hover:text-olive transition-colors focus:outline-none focus-visible:bg-[#F4F3ED]"
+                  className="w-full px-4 sm:px-6 py-4 text-left flex items-center justify-between gap-3 font-bold text-sm sm:text-base text-brand-black hover:text-olive transition-colors focus:outline-none focus-visible:bg-[#F4F3ED]"
                   aria-expanded={isOpen}
                 >
                   <span>{faq.question}</span>
@@ -50,7 +50,7 @@ export const FAQSection: React.FC = () => {
                 </button>
 
                 {isOpen && (
-                  <div className="px-6 pb-5 pt-1 text-sm text-brand-grey leading-relaxed border-t border-[#D8D2C5]">
+                  <div className="px-4 sm:px-6 pb-5 pt-1 text-xs sm:text-sm text-brand-grey leading-relaxed border-t border-[#D8D2C5]">
                     {faq.answer}
                   </div>
                 )}

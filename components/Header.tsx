@@ -190,8 +190,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAccount }) =
           </div>
         </div>
 
-        {/* FULL-WIDTH MEGA MENU DROPDOWN */}
+        {/* FULL-WIDTH MEGA MENU DROPDOWN (Desktop only) */}
         <div
+          className="hidden lg:block"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >

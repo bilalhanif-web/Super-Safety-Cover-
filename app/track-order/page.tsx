@@ -48,18 +48,18 @@ export default function TrackOrderPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <form onSubmit={handleTrack} className="flex gap-2 max-w-xl mx-auto mb-10">
+        <form onSubmit={handleTrack} className="flex flex-col sm:flex-row gap-2 max-w-xl mx-auto mb-10">
           <input
             type="text"
             required
             placeholder="Order ID (e.g. SSC-784123) or Mobile #"
             value={orderQuery}
             onChange={(e) => setOrderQuery(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-md border border-brand-lightgrey text-xs sm:text-sm text-brand-black outline-none focus:border-olive"
+            className="flex-1 min-w-0 px-4 py-3 rounded-md border border-brand-lightgrey text-xs sm:text-sm text-brand-black outline-none focus:border-olive"
           />
           <button
             type="submit"
-            className="bg-olive text-white px-6 py-3 rounded-md text-xs sm:text-sm font-bold hover:bg-olive-hover transition-colors shrink-0 flex items-center gap-1.5"
+            className="bg-olive text-white px-6 py-3 rounded-md text-xs sm:text-sm font-bold hover:bg-olive-hover transition-colors shrink-0 flex items-center justify-center gap-1.5"
           >
             <Search className="w-4 h-4" />
             <span>Track</span>

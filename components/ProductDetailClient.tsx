@@ -994,10 +994,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="flex-1 py-3.5 px-6 rounded-md bg-olive text-white font-bold text-sm hover:bg-olive-hover transition-colors flex items-center justify-center gap-2 shadow-sm active:scale-[0.99]"
+                  className="flex-1 min-w-0 py-3.5 px-3 sm:px-6 rounded-md bg-olive text-white font-bold text-xs sm:text-sm hover:bg-olive-hover transition-colors flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm active:scale-[0.99]"
                 >
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>Add to Cart</span>
+                  <ShoppingBag className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Add to Cart</span>
                 </button>
               </div>
 

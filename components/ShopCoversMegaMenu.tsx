@@ -253,7 +253,7 @@ export const ShopCoversMegaMenu: React.FC<ShopCoversMegaMenuProps> = ({ isOpen, 
 
   return (
     <div
-      className={`absolute top-full left-0 w-full bg-white border-b border-brand-lightgrey shadow-md z-50 transition-all duration-200 ${
+      className={`hidden lg:block absolute top-full left-0 w-full bg-white border-b border-brand-lightgrey shadow-md z-50 transition-all duration-200 ${
         isOpen
           ? "opacity-100 visible pointer-events-auto translate-y-0"
           : "opacity-0 invisible pointer-events-none -translate-y-1"
