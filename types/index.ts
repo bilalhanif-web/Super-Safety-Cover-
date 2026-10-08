@@ -49,6 +49,24 @@ export interface Product {
   badge?: string;
 }
 
+export interface CustomMeasurements {
+  productTypeOrModel: string;
+  dim1Label: string;
+  dim1Value: string;
+  dim2Label: string;
+  dim2Value: string;
+  dim3Label: string;
+  dim3Value: string;
+  unit: 'inches' | 'cm';
+  notes?: string;
+
+  // Compatibility fields
+  bikeModel?: string;
+  length?: string;
+  width?: string;
+  height?: string;
+}
+
 export interface CartItem {
   id: string; // composite
   productId: string;
@@ -61,6 +79,7 @@ export interface CartItem {
   selectedColor?: string;
   selectedType?: string;
   selectedCapacity?: string;
+  customMeasurements?: CustomMeasurements;
   variantSummary?: string;
   quantity: number;
 }

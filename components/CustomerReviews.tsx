@@ -18,7 +18,7 @@ function getProductThumbnail(productName: string, explicitImage?: string): strin
   if (lower.includes("cooler")) return "/images/products/air-coller-cover.webp";
   if (lower.includes("mattress")) return "/images/products/mattress-cover.webp";
   if (lower.includes("rain")) return "/images/products/rain-dress-cover.webp";
-  return "/images/products/bike-cover.webp";
+  return "/images/products/bike-cover-image.webp";
 }
 
 /**
@@ -31,9 +31,40 @@ function getProductThumbnail(productName: string, explicitImage?: string): strin
  * - Exact responsive cards: Desktop (3), Tablet (2), Mobile (1)
  * - Brand palette: #121212, #F4F3ED, #E7E2D7, #66743A, #FFFFFF, #D8D2C5
  */
-export const CustomerReviews: React.FC = () => {
+export interface CustomerReviewsProps {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  bgClassName?: string;
+  categoryFilter?: string;
+}
+
+export const CustomerReviews: React.FC<CustomerReviewsProps> = ({
+  badge = "Customer Feedback",
+  title = "What Our Customers Say",
+  subtitle = "Real experiences from motorcycle owners, car drivers, and families across Pakistan.",
+  bgClassName = "bg-[#E7E2D7]",
+  categoryFilter,
+}) => {
+  // Order reviews so matching products/category appear first, if categoryFilter is given
+  const orderedReviews = useMemo(() => {
+    if (!categoryFilter) return REVIEWS;
+    const filterLower = categoryFilter.toLowerCase().replace(/-/g, " ");
+    const matching = REVIEWS.filter(
+      (r) =>
+        r.productName.toLowerCase().includes(filterLower) ||
+        (r.productImage && r.productImage.toLowerCase().includes(filterLower))
+    );
+    const nonMatching = REVIEWS.filter(
+      (r) =>
+        !r.productName.toLowerCase().includes(filterLower) &&
+        (!r.productImage || !r.productImage.toLowerCase().includes(filterLower))
+    );
+    return [...matching, ...nonMatching];
+  }, [categoryFilter]);
+
   // Triple duplicated array for seamless infinite looping
-  const allReviews = useMemo(() => [...REVIEWS, ...REVIEWS, ...REVIEWS], []);
+  const allReviews = useMemo(() => [...orderedReviews, ...orderedReviews, ...orderedReviews], [orderedReviews]);
 
   const carouselRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -210,20 +241,20 @@ export const CustomerReviews: React.FC = () => {
   };
 
   return (
-    <section className="py-16 md:py-20 bg-[#E7E2D7] border-b border-[#D8D2C5] select-none">
+    <section className={`py-16 md:py-20 ${bgClassName} border-b border-[#D8D2C5] select-none`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header with Navigation Arrows */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 md:mb-12 gap-4">
           <div className="max-w-2xl">
-            <span className="text-xs font-bold uppercase tracking-wider text-olive mb-1.5 block">
-              Customer Feedback
-            </span>
+            {badge && (
+              <span className="text-xs font-bold uppercase tracking-wider text-olive mb-1.5 block">
+                {badge}
+              </span>
+            )}
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-brand-black tracking-tight mb-2">
-              What Our Customers Say
+              {title}
             </h2>
-            <p className="text-sm text-brand-grey">
-              Real experiences from motorcycle owners, car drivers, and families across Pakistan.
-            </p>
+            {subtitle && <p className="text-sm text-brand-grey">{subtitle}</p>}
           </div>
 
           {/* Navigation Arrows */}

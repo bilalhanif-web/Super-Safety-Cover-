@@ -47,7 +47,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [cart, isInitialized]);
 
   const addToCart = (item: Omit<CartItem, "id">) => {
-    const id = `${item.productId}-${item.selectedModel || "default"}-${item.selectedSize || "default"}-${item.selectedColor || "default"}-${item.selectedType || "default"}-${item.selectedCapacity || "default"}`;
+    const customSuffix = item.customMeasurements
+      ? `-${item.customMeasurements.productTypeOrModel || item.customMeasurements.bikeModel || "custom"}-${item.customMeasurements.dim1Value || item.customMeasurements.length}x${item.customMeasurements.dim2Value || item.customMeasurements.width}x${item.customMeasurements.dim3Value || item.customMeasurements.height}-${item.customMeasurements.unit}`
+      : "";
+    const id = `${item.productId}-${item.selectedModel || "default"}-${item.selectedSize || "default"}-${item.selectedColor || "default"}-${item.selectedType || "default"}-${item.selectedCapacity || "default"}${customSuffix}`;
     setCart((prev) => {
       const existing = prev.find((i) => i.id === id);
       if (existing) {

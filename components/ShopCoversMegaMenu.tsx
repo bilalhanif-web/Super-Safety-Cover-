@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, ArrowRight } from "lucide-react";
+import { ChevronRight, ArrowRight, ShieldCheck } from "lucide-react";
 import { CATEGORIES } from "@/data";
 
 interface ShopCoversMegaMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  resetKey?: number;
 }
 
 interface ColumnGroup {
@@ -246,10 +247,21 @@ const CATEGORY_PANELS: Record<string, CategoryData> = {
   },
 };
 
-export const ShopCoversMegaMenu: React.FC<ShopCoversMegaMenuProps> = ({ isOpen, onClose }) => {
-  const [activeCategory, setActiveCategory] = useState<string>("bike-covers");
+export const ShopCoversMegaMenu: React.FC<ShopCoversMegaMenuProps> = ({
+  isOpen,
+  onClose,
+  resetKey = 0,
+}) => {
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  const currentPanel = CATEGORY_PANELS[activeCategory] || CATEGORY_PANELS["bike-covers"];
+  // Whenever mega menu opens or reset is requested, no category is selected by default
+  useEffect(() => {
+    if (isOpen) {
+      setActiveCategory(null);
+    }
+  }, [isOpen, resetKey]);
+
+  const currentPanel = activeCategory ? CATEGORY_PANELS[activeCategory] : null;
 
   return (
     <div
@@ -293,94 +305,108 @@ export const ShopCoversMegaMenu: React.FC<ShopCoversMegaMenuProps> = ({ isOpen, 
             </ul>
           </div>
 
-          {/* RIGHT AREA: Exact Reference Layout */}
-          <div className="flex-1 min-w-0">
-            {/* Top Row: Title, Short Description, View All Link */}
-            <div className="flex items-center justify-between pb-3.5 mb-6 border-b border-brand-lightgrey">
-              <div>
-                <h4 className="text-base font-extrabold text-brand-black tracking-tight">
-                  {currentPanel.title}
-                </h4>
-                <p className="text-xs text-brand-grey mt-0.5">
-                  {currentPanel.description}
-                </p>
+          {/* RIGHT AREA: Neutral state until hover or click, otherwise selected category details */}
+          {!currentPanel ? (
+            <div className="flex-1 min-w-0 min-h-[350px] flex flex-col items-center justify-center text-center p-8 rounded-xl border border-dashed border-brand-lightgrey/80 bg-brand-offwhite/40">
+              <div className="w-12 h-12 rounded-full bg-olive-soft flex items-center justify-center text-olive mb-3">
+                <ShieldCheck className="w-6 h-6 stroke-[1.75]" />
               </div>
-              <Link
-                href={currentPanel.viewAllHref}
-                onClick={onClose}
-                className="text-xs font-bold text-olive hover:underline inline-flex items-center gap-1 shrink-0"
-              >
-                <span>{currentPanel.viewAllText}</span>
-              </Link>
+              <h4 className="text-sm font-bold text-brand-black">
+                Select a Category to Explore
+              </h4>
+              <p className="text-xs text-brand-grey max-w-sm mt-1 leading-relaxed">
+                Hover or click any protective cover on the left to view available models, sizes, and custom fits.
+              </p>
             </div>
-
-            {/* Below: Column 1 | Column 2 | Right Side Product Image */}
-            <div className="grid grid-cols-12 gap-8 items-start">
-              {/* COLUMN 1 */}
-              <div className="col-span-4">
-                <div className="text-xs font-bold text-brand-black uppercase tracking-wider mb-2.5 pb-1 border-b border-brand-lightgrey">
-                  {currentPanel.col1.heading}
+          ) : (
+            <div className="flex-1 min-w-0">
+              {/* Top Row: Title, Short Description, View All Link */}
+              <div className="flex items-center justify-between pb-3.5 mb-6 border-b border-brand-lightgrey">
+                <div>
+                  <h4 className="text-base font-extrabold text-brand-black tracking-tight">
+                    {currentPanel.title}
+                  </h4>
+                  <p className="text-xs text-brand-grey mt-0.5">
+                    {currentPanel.description}
+                  </p>
                 </div>
-                <ul className="space-y-2 text-xs">
-                  {currentPanel.col1.items.map((item, idx) => (
-                    <li key={idx}>
-                      <Link
-                        href={item.href}
-                        onClick={onClose}
-                        className="block py-0.5 text-brand-black hover:text-olive font-medium transition-colors"
-                      >
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* COLUMN 2 */}
-              <div className="col-span-4 space-y-6">
-                {currentPanel.col2.map((group, gIdx) => (
-                  <div key={gIdx}>
-                    <div className="text-xs font-bold text-brand-black uppercase tracking-wider mb-2.5 pb-1 border-b border-brand-lightgrey">
-                      {group.heading}
-                    </div>
-                    <ul className="space-y-2 text-xs">
-                      {group.items.map((item, idx) => (
-                        <li key={idx}>
-                          <Link
-                            href={item.href}
-                            onClick={onClose}
-                            className="block py-0.5 text-brand-black hover:text-olive font-medium transition-colors"
-                          >
-                            {item.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-
-              {/* RIGHT SIDE: LARGE CLEAN PRODUCT IMAGE */}
-              <div className="col-span-4 flex items-center justify-center self-stretch">
                 <Link
                   href={currentPanel.viewAllHref}
                   onClick={onClose}
-                  className="relative w-full h-full min-h-[300px] flex items-center justify-center bg-white rounded-xl border border-brand-lightgrey/60 overflow-hidden group transition-colors hover:border-olive/40"
+                  className="text-xs font-bold text-olive hover:underline inline-flex items-center gap-1 shrink-0"
                 >
-                  <div className="relative w-full h-full p-2 flex items-center justify-center">
-                    <Image
-                      src={currentPanel.image}
-                      alt={currentPanel.altText}
-                      fill
-                      priority
-                      className="object-contain transition-transform duration-300 group-hover:scale-[1.02]"
-                      sizes="(max-width: 1280px) 360px, 420px"
-                    />
-                  </div>
+                  <span>{currentPanel.viewAllText}</span>
                 </Link>
               </div>
+
+              {/* Below: Column 1 | Column 2 | Right Side Product Image */}
+              <div className="grid grid-cols-12 gap-8 items-start">
+                {/* COLUMN 1 */}
+                <div className="col-span-4">
+                  <div className="text-xs font-bold text-brand-black uppercase tracking-wider mb-2.5 pb-1 border-b border-brand-lightgrey">
+                    {currentPanel.col1.heading}
+                  </div>
+                  <ul className="space-y-2 text-xs">
+                    {currentPanel.col1.items.map((item, idx) => (
+                      <li key={idx}>
+                        <Link
+                          href={item.href}
+                          onClick={onClose}
+                          className="block py-0.5 text-brand-black hover:text-olive font-medium transition-colors"
+                        >
+                          {item.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* COLUMN 2 */}
+                <div className="col-span-4 space-y-6">
+                  {currentPanel.col2.map((group, gIdx) => (
+                    <div key={gIdx}>
+                      <div className="text-xs font-bold text-brand-black uppercase tracking-wider mb-2.5 pb-1 border-b border-brand-lightgrey">
+                        {group.heading}
+                      </div>
+                      <ul className="space-y-2 text-xs">
+                        {group.items.map((item, idx) => (
+                          <li key={idx}>
+                            <Link
+                              href={item.href}
+                              onClick={onClose}
+                              className="block py-0.5 text-brand-black hover:text-olive font-medium transition-colors"
+                            >
+                              {item.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
+                {/* RIGHT SIDE: CLEAN MENU PRODUCT IMAGE */}
+                <div className="col-span-4 flex items-center justify-center self-stretch">
+                  <Link
+                    href={currentPanel.viewAllHref}
+                    onClick={onClose}
+                    className="relative w-full max-w-[300px] h-[270px] max-h-[270px] flex items-center justify-center bg-white rounded-xl border border-brand-lightgrey/70 p-3 overflow-hidden group transition-all hover:border-olive/50 hover:shadow-xs"
+                  >
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <Image
+                        src={currentPanel.image}
+                        alt={currentPanel.altText}
+                        fill
+                        priority
+                        className="object-contain object-center transition-transform duration-300 group-hover:scale-[1.02]"
+                        sizes="300px"
+                      />
+                    </div>
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

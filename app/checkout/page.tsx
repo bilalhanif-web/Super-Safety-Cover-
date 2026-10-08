@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { CartItem } from "@/types";
 
 export default function CheckoutPage() {
   const { cart, subtotal, clearCart } = useCart();
@@ -126,7 +127,25 @@ export default function CheckoutPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
-                href={`https://wa.me/923288985916?text=Hi%20Super%20Safety%20Cover,%20I%20placed%20order%20${placedOrderId}%20for%20Rs.%20${placedOrderSummary.total}.`}
+                href={`https://wa.me/923288985916?text=${encodeURIComponent(
+                  `Hi Super Safety Cover,\n\nI placed order ${placedOrderId} for Rs. ${placedOrderSummary.total.toLocaleString()}.\n\nOrder Details:\n` +
+                    placedOrderSummary.items
+                      .map((item: CartItem) => {
+                        if (item.customMeasurements) {
+                          const cm = item.customMeasurements;
+                          const modelText = cm.productTypeOrModel || cm.bikeModel || "Custom Model";
+                          const d1 = cm.dim1Label ? `${cm.dim1Label}: ${cm.dim1Value} ${cm.unit}` : `Length: ${cm.length} ${cm.unit}`;
+                          const d2 = cm.dim2Label ? `${cm.dim2Label}: ${cm.dim2Value} ${cm.unit}` : `Width: ${cm.width} ${cm.unit}`;
+                          const d3 = cm.dim3Label ? `${cm.dim3Label}: ${cm.dim3Value} ${cm.unit}` : `Height: ${cm.height} ${cm.unit}`;
+                          return `• ${item.name} x${item.quantity}\n  Variant: Custom Size\n  Model: ${modelText}\n  Color: ${item.selectedColor || "Standard"}\n  ${d1}\n  ${d2}\n  ${d3}${
+                            cm.notes ? `\n  Additional Notes: ${cm.notes}` : ""
+                          }`;
+                        }
+                        return `• ${item.name} x${item.quantity}${item.variantSummary ? `\n  ${item.variantSummary}` : ""}`;
+                      })
+                      .join("\n\n") +
+                    `\n\nDelivery To:\nName: ${placedOrderSummary.customer.fullName}\nPhone: ${placedOrderSummary.customer.phone}\nCity: ${placedOrderSummary.customer.city}\nAddress: ${placedOrderSummary.customer.address}`
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-olive text-white px-6 py-3 rounded-md text-xs sm:text-sm font-bold hover:bg-olive-hover transition-colors"
@@ -188,7 +207,7 @@ export default function CheckoutPage() {
 
                   <div>
                     <label htmlFor="checkout-fullname" className="block text-xs font-bold text-brand-black mb-1.5">
-                      Full Name <span className="text-red-500">*</span>
+                      Full Name (مکمل نام) <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="checkout-fullname"
@@ -205,7 +224,7 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="checkout-phone" className="block text-xs font-bold text-brand-black mb-1.5">
-                        Phone Number (Active for SMS/WhatsApp) <span className="text-red-500">*</span>
+                        Phone Number (فون نمبر) <span className="text-red-500">*</span>
                       </label>
                       <input
                         id="checkout-phone"
@@ -263,7 +282,7 @@ export default function CheckoutPage() {
 
                     <div>
                       <label htmlFor="checkout-city" className="block text-xs font-bold text-brand-black mb-1.5">
-                        City / District <span className="text-red-500">*</span>
+                        City (شہر) <span className="text-red-500">*</span>
                       </label>
                       <input
                         id="checkout-city"
@@ -280,7 +299,7 @@ export default function CheckoutPage() {
 
                   <div>
                     <label htmlFor="checkout-address" className="block text-xs font-bold text-brand-black mb-1.5">
-                      Full Street Address / House & Colony <span className="text-red-500">*</span>
+                      Delivery Address (ڈیلیوری ایڈریس) <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       id="checkout-address"
@@ -296,7 +315,7 @@ export default function CheckoutPage() {
 
                   <div>
                     <label htmlFor="checkout-notes" className="block text-xs font-bold text-brand-black mb-1.5">
-                      Order Notes <span className="text-brand-grey font-normal">(Optional)</span>
+                      Order Notes (آرڈر نوٹس) <span className="text-brand-grey font-normal">(Optional)</span>
                     </label>
                     <input
                       id="checkout-notes"

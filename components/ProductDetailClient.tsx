@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -18,7 +18,11 @@ import {
   X,
 } from "lucide-react";
 import { Product } from "@/types";
+import { PRODUCTS } from "@/data";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ProductCard } from "@/components/ProductCard";
+import { CustomerReviews } from "@/components/CustomerReviews";
+import { getProductDescription } from "@/data/productDescriptions";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 
@@ -38,58 +42,145 @@ const WhatsAppIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" 
   </svg>
 );
 
-// Color palettes per product category
-const CATEGORY_COLORS: Record<string, ColorOption[]> = {
-  "bike-covers": [
-    { name: "Black", hex: "#111111" },
-    { name: "Grey", hex: "#6B6B6B" },
-    { name: "Olive Green", hex: "#66743A" },
-    { name: "Navy Blue", hex: "#1E3A8A" },
-  ],
-  "car-covers": [
-    { name: "Silver Grey", hex: "#9CA3AF" },
-    { name: "Black", hex: "#111111" },
-    { name: "Olive Green", hex: "#66743A" },
-    { name: "Navy Blue", hex: "#1E3A8A" },
-  ],
-  "washing-machine-covers": [
-    { name: "Grey", hex: "#6B6B6B" },
-    { name: "Black", hex: "#111111" },
-    { name: "Olive Green", hex: "#66743A" },
-  ],
-  "ac-covers": [
-    { name: "Off-White", hex: "#F3F4F6" },
-    { name: "Grey", hex: "#6B6B6B" },
-    { name: "Olive Green", hex: "#66743A" },
-  ],
-  "mattress-covers": [
-    { name: "White", hex: "#FFFFFF" },
-    { name: "Grey", hex: "#6B6B6B" },
-    { name: "Navy Blue", hex: "#1E3A8A" },
-  ],
-  "fan-covers": [
-    { name: "Grey", hex: "#6B6B6B" },
-    { name: "Black", hex: "#111111" },
-    { name: "Olive Green", hex: "#66743A" },
-  ],
-  "air-cooler-covers": [
-    { name: "Grey", hex: "#6B6B6B" },
-    { name: "Black", hex: "#111111" },
-    { name: "Olive Green", hex: "#66743A" },
-  ],
-  "rain-dress": [
-    { name: "Black", hex: "#111111" },
-    { name: "Navy Blue", hex: "#1E3A8A" },
-    { name: "Olive Green", hex: "#66743A" },
-  ],
-};
-
-const DEFAULT_COLORS: ColorOption[] = [
-  { name: "Black", hex: "#111111" },
-  { name: "Grey", hex: "#6B6B6B" },
-  { name: "Olive Green", hex: "#66743A" },
-  { name: "Navy Blue", hex: "#1E3A8A" },
+// Final 6 universal color variants for EVERY product
+export const PRODUCT_COLORS: ColorOption[] = [
+  { name: "Green", hex: "#2E5A36" },
+  { name: "Black", hex: "#1A1A1A" },
+  { name: "Maroon", hex: "#6B1D2F" },
+  { name: "Purple", hex: "#4E2A5E" },
+  { name: "Navy", hex: "#1B2A4A" },
+  { name: "Blue Grey", hex: "#5B6E7D" },
 ];
+
+export interface CategoryMeasurementConfig {
+  modelLabel: string;
+  modelPlaceholder: string;
+  dim1Label: string;
+  dim1PlaceholderInches: string;
+  dim1PlaceholderCm: string;
+  dim2Label: string;
+  dim2PlaceholderInches: string;
+  dim2PlaceholderCm: string;
+  dim3Label: string;
+  dim3PlaceholderInches: string;
+  dim3PlaceholderCm: string;
+  notesPlaceholder: string;
+}
+
+export const CATEGORY_MEASUREMENT_CONFIGS: Record<string, CategoryMeasurementConfig> = {
+  "bike-covers": {
+    modelLabel: "Bike Model",
+    modelPlaceholder: "e.g. Honda CD 70, Suzuki GR 150, Yamaha YBR, etc.",
+    dim1Label: "Length",
+    dim1PlaceholderInches: "e.g. 78",
+    dim1PlaceholderCm: "e.g. 190",
+    dim2Label: "Width",
+    dim2PlaceholderInches: "e.g. 32",
+    dim2PlaceholderCm: "e.g. 85",
+    dim3Label: "Height",
+    dim3PlaceholderInches: "e.g. 45",
+    dim3PlaceholderCm: "e.g. 115",
+    notesPlaceholder: "e.g. Side carrier boxes, high windshield, crash guard installed",
+  },
+  "car-covers": {
+    modelLabel: "Car Model",
+    modelPlaceholder: "e.g. Toyota Corolla, Honda Civic, Suzuki Alto, etc.",
+    dim1Label: "Length",
+    dim1PlaceholderInches: "e.g. 175",
+    dim1PlaceholderCm: "e.g. 445",
+    dim2Label: "Width",
+    dim2PlaceholderInches: "e.g. 68",
+    dim2PlaceholderCm: "e.g. 173",
+    dim3Label: "Height",
+    dim3PlaceholderInches: "e.g. 58",
+    dim3PlaceholderCm: "e.g. 147",
+    notesPlaceholder: "e.g. Rear spoiler, body kit, roof rack installed",
+  },
+  "ac-covers": {
+    modelLabel: "AC Type",
+    modelPlaceholder: "e.g. 1.5 Ton Gree Inverter, Standing AC, Floor AC, etc.",
+    dim1Label: "Width",
+    dim1PlaceholderInches: "e.g. 38",
+    dim1PlaceholderCm: "e.g. 96",
+    dim2Label: "Height",
+    dim2PlaceholderInches: "e.g. 12",
+    dim2PlaceholderCm: "e.g. 30",
+    dim3Label: "Depth",
+    dim3PlaceholderInches: "e.g. 9",
+    dim3PlaceholderCm: "e.g. 23",
+    notesPlaceholder: "e.g. Extra piping clearance on left/right side",
+  },
+  "washing-machine-covers": {
+    modelLabel: "Machine Type",
+    modelPlaceholder: "e.g. Haier 12KG Top Load, Dawlance Front Load, etc.",
+    dim1Label: "Width",
+    dim1PlaceholderInches: "e.g. 24",
+    dim1PlaceholderCm: "e.g. 60",
+    dim2Label: "Height",
+    dim2PlaceholderInches: "e.g. 36",
+    dim2PlaceholderCm: "e.g. 90",
+    dim3Label: "Depth",
+    dim3PlaceholderInches: "e.g. 24",
+    dim3PlaceholderCm: "e.g. 60",
+    notesPlaceholder: "e.g. Top transparent zipper window or rear pipe clearance",
+  },
+  "mattress-covers": {
+    modelLabel: "Mattress Type",
+    modelPlaceholder: "e.g. Master MoltyFoam, Custom Orthopedic, Single XL, etc.",
+    dim1Label: "Length",
+    dim1PlaceholderInches: "e.g. 78",
+    dim1PlaceholderCm: "e.g. 198",
+    dim2Label: "Width",
+    dim2PlaceholderInches: "e.g. 72",
+    dim2PlaceholderCm: "e.g. 183",
+    dim3Label: "Thickness",
+    dim3PlaceholderInches: "e.g. 8",
+    dim3PlaceholderCm: "e.g. 20",
+    notesPlaceholder: "e.g. Extra deep pillow-top pocket needed",
+  },
+  "fan-covers": {
+    modelLabel: "Fan Type",
+    modelPlaceholder: "e.g. Vintage Pak Fan, Exhaust Fan, Industrial Pedestal, etc.",
+    dim1Label: "Diameter",
+    dim1PlaceholderInches: "e.g. 56",
+    dim1PlaceholderCm: "e.g. 142",
+    dim2Label: "Height",
+    dim2PlaceholderInches: "e.g. 18",
+    dim2PlaceholderCm: "e.g. 45",
+    dim3Label: "Base Size",
+    dim3PlaceholderInches: "e.g. 12",
+    dim3PlaceholderCm: "e.g. 30",
+    notesPlaceholder: "e.g. Heavy motor canopy or special blade curve",
+  },
+  "air-cooler-covers": {
+    modelLabel: "Cooler Type",
+    modelPlaceholder: "e.g. Super Asia Room Cooler, Boss Desert Cooler, etc.",
+    dim1Label: "Width",
+    dim1PlaceholderInches: "e.g. 32",
+    dim1PlaceholderCm: "e.g. 81",
+    dim2Label: "Height",
+    dim2PlaceholderInches: "e.g. 48",
+    dim2PlaceholderCm: "e.g. 122",
+    dim3Label: "Depth",
+    dim3PlaceholderInches: "e.g. 28",
+    dim3PlaceholderCm: "e.g. 71",
+    notesPlaceholder: "e.g. Wheels attached, rear water pipe clearance",
+  },
+  "rain-dress": {
+    modelLabel: "Fit / Suit Type",
+    modelPlaceholder: "e.g. Slim Fit, Regular Over-Clothes Fit, etc.",
+    dim1Label: "Chest",
+    dim1PlaceholderInches: "e.g. 44",
+    dim1PlaceholderCm: "e.g. 112",
+    dim2Label: "Waist",
+    dim2PlaceholderInches: "e.g. 36",
+    dim2PlaceholderCm: "e.g. 91",
+    dim3Label: "Height",
+    dim3PlaceholderInches: "e.g. 68",
+    dim3PlaceholderCm: "e.g. 172",
+    notesPlaceholder: "e.g. Extended sleeve length, helmet-compatible hood",
+  },
+};
 
 export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product }) => {
   const router = useRouter();
@@ -113,6 +204,17 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
 
+  // Custom Size Measurements State (for ALL Products)
+  const [customSize, setCustomSize] = useState({
+    modelName: "",
+    dim1: "",
+    dim2: "",
+    dim3: "",
+    unit: "inches" as "inches" | "cm",
+    notes: "",
+  });
+  const [customSizeErrors, setCustomSizeErrors] = useState<Record<string, string>>({});
+
   // Quantity
   const [quantity, setQuantity] = useState(1);
 
@@ -120,10 +222,16 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
   const [variantError, setVariantError] = useState<string>("");
   const [addedNotice, setAddedNotice] = useState(false);
 
-  // Active Tab
-  const [activeTab, setActiveTab] = useState<
-    "description" | "features" | "specs" | "shipping" | "reviews"
-  >("description");
+  // Unique tailored product description & features
+  const productDescriptionData = useMemo(
+    () => getProductDescription(product.slug, product.category),
+    [product.slug, product.category]
+  );
+
+  // 4 related products excluding current product
+  const relatedProducts = useMemo(() => {
+    return PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
+  }, [product.id]);
 
   // WhatsApp Order Modal State
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
@@ -155,17 +263,23 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
     };
   }, [isWhatsAppModalOpen]);
 
-  // Color options for this product
-  const colorOptions = CATEGORY_COLORS[product.category] || DEFAULT_COLORS;
+  // Universal color options for this product
+  const colorOptions = PRODUCT_COLORS;
+
+  // Initialize default color if not set
+  useEffect(() => {
+    if (!selectedColor && PRODUCT_COLORS.length > 0) {
+      setSelectedColor(PRODUCT_COLORS[0].name);
+    }
+  }, [selectedColor]);
 
   // Default variant initialization for AC covers
   useEffect(() => {
     if (product.category === "ac-covers") {
       if (!selectedAcSize) setSelectedAcSize("1.5 Ton");
       if (!selectedUnitType) setSelectedUnitType("Indoor Unit");
-      if (!selectedColor && colorOptions.length > 0) setSelectedColor(colorOptions[0].name);
     }
-  }, [product.category, colorOptions, selectedAcSize, selectedUnitType, selectedColor]);
+  }, [product.category, selectedAcSize, selectedUnitType]);
 
   // Bike models list
   const bikeModelsList = [
@@ -174,56 +288,105 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
     { name: "Yamaha YBR 125", available: true },
     { name: "Suzuki GS 150", available: true },
     { name: "Universal Fit", available: true },
+    { name: "Custom Size", available: true },
   ];
   if (product.bikeModel && !bikeModelsList.some((bm) => bm.name === product.bikeModel)) {
     bikeModelsList.splice(4, 0, { name: product.bikeModel, available: true });
   }
 
+  // Check if Custom Size is currently selected across ANY category
+  const isCustomSizeActive =
+    (product.category === "bike-covers" && selectedModel === "Custom Size") ||
+    (product.category === "car-covers" && selectedSize === "Custom Size") ||
+    (product.category === "ac-covers" && selectedAcSize === "Custom Size") ||
+    (product.category === "washing-machine-covers" && selectedCapacity === "Custom Size") ||
+    (product.category === "mattress-covers" && selectedSize === "Custom Size") ||
+    (product.category === "fan-covers" && selectedFanSize === "Custom Size") ||
+    (product.category === "air-cooler-covers" && selectedSize === "Custom Size") ||
+    (product.category === "rain-dress" && selectedSize === "Custom Size") ||
+    (!isBikeProduct && selectedSize === "Custom Size");
+
   // Variant validation function
   const validateVariants = (): boolean => {
+    if (!selectedColor) {
+      setVariantError("Please select a color.");
+      return false;
+    }
+
+    const config =
+      CATEGORY_MEASUREMENT_CONFIGS[product.category] ||
+      CATEGORY_MEASUREMENT_CONFIGS["bike-covers"];
+
+    if (isCustomSizeActive) {
+      const errors: Record<string, string> = {};
+      if (!customSize.modelName.trim()) {
+        errors.modelName = `Please enter ${config.modelLabel}.`;
+      }
+      if (!customSize.dim1.trim()) {
+        errors.dim1 = `${config.dim1Label} is required.`;
+      }
+      if (!customSize.dim2.trim()) {
+        errors.dim2 = `${config.dim2Label} is required.`;
+      }
+      if (!customSize.dim3.trim()) {
+        errors.dim3 = `${config.dim3Label} is required.`;
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setCustomSizeErrors(errors);
+        setVariantError(
+          `Please fill in required custom measurements (${config.modelLabel}, ${config.dim1Label}, ${config.dim2Label}, ${config.dim3Label}).`
+        );
+        return false;
+      }
+
+      setVariantError("");
+      return true;
+    }
+
     if (product.category === "bike-covers") {
-      if (!selectedModel || !selectedColor) {
-        setVariantError("Please select your bike model and color.");
+      if (!selectedModel) {
+        setVariantError("Please select your bike model.");
         return false;
       }
     } else if (product.category === "washing-machine-covers") {
-      if (!selectedMachineType || !selectedCapacity || !selectedColor) {
-        setVariantError("Please select your machine type, capacity, and color.");
+      if (!selectedMachineType || !selectedCapacity) {
+        setVariantError("Please select your machine type and capacity.");
         return false;
       }
     } else if (product.category === "ac-covers") {
-      if (!selectedAcSize || !selectedUnitType || !selectedColor) {
-        setVariantError("Please select your AC size, unit type, and color.");
+      if (!selectedAcSize || !selectedUnitType) {
+        setVariantError("Please select your AC size and unit type.");
         return false;
       }
     } else if (product.category === "mattress-covers") {
-      if (!selectedSize || !selectedColor) {
-        setVariantError("Please select your mattress size and color.");
+      if (!selectedSize) {
+        setVariantError("Please select your mattress size.");
         return false;
       }
     } else if (product.category === "fan-covers") {
-      if (!selectedFanType || !selectedFanSize || !selectedColor) {
-        setVariantError("Please select your fan type, size, and color.");
+      if (!selectedFanType || !selectedFanSize) {
+        setVariantError("Please select your fan type and size.");
         return false;
       }
     } else if (product.category === "air-cooler-covers") {
-      if (!selectedSize || !selectedColor) {
-        setVariantError("Please select your cooler size and color.");
+      if (!selectedSize) {
+        setVariantError("Please select your cooler size.");
         return false;
       }
     } else if (product.category === "rain-dress") {
-      if (!selectedSize || !selectedColor) {
-        setVariantError("Please select your size and color.");
+      if (!selectedSize) {
+        setVariantError("Please select your size.");
         return false;
       }
     } else if (product.category === "car-covers") {
-      if (!selectedSize || !selectedColor) {
-        setVariantError("Please select your car size and color.");
+      if (!selectedSize) {
+        setVariantError("Please select your car size.");
         return false;
       }
-    } else {
-      if (!selectedColor) {
-        setVariantError("Please select a color.");
+    } else if (product.sizes && product.sizes.length > 0) {
+      if (!selectedSize) {
+        setVariantError("Please select a size.");
         return false;
       }
     }
@@ -234,6 +397,15 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
 
   // Generate variant summary for cart and checkout synchronization
   const getVariantSummary = (): string => {
+    const config =
+      CATEGORY_MEASUREMENT_CONFIGS[product.category] ||
+      CATEGORY_MEASUREMENT_CONFIGS["bike-covers"];
+
+    if (isCustomSizeActive) {
+      const notesPart = customSize.notes.trim() ? ` | Notes: ${customSize.notes.trim()}` : "";
+      return `Variant: Custom Size | ${config.modelLabel}: ${customSize.modelName.trim()} | Color: ${selectedColor} | ${config.dim1Label}: ${customSize.dim1.trim()} ${customSize.unit}, ${config.dim2Label}: ${customSize.dim2.trim()} ${customSize.unit}, ${config.dim3Label}: ${customSize.dim3.trim()} ${customSize.unit}${notesPart}`;
+    }
+
     if (product.category === "bike-covers") {
       return `Bike Model: ${selectedModel} | Color: ${selectedColor}`;
     }
@@ -256,13 +428,17 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       return `Size: ${selectedSize} | Color: ${selectedColor}`;
     }
     if (product.category === "car-covers") {
-      return `Size: ${selectedSize} | Color: ${selectedColor}`;
+      return `Car Size: ${selectedSize} | Color: ${selectedColor}`;
     }
     return `Color: ${selectedColor}${selectedSize ? ` | Size: ${selectedSize}` : ""}`;
   };
 
   const handleAddToCart = () => {
     if (!validateVariants()) return;
+
+    const config =
+      CATEGORY_MEASUREMENT_CONFIGS[product.category] ||
+      CATEGORY_MEASUREMENT_CONFIGS["bike-covers"];
 
     addToCart({
       productId: product.id,
@@ -275,6 +451,23 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       selectedColor,
       selectedType: selectedMachineType || selectedAcSize || selectedFanType || undefined,
       selectedCapacity: selectedCapacity || selectedUnitType || selectedFanSize || undefined,
+      customMeasurements: isCustomSizeActive
+        ? {
+            productTypeOrModel: customSize.modelName.trim(),
+            dim1Label: config.dim1Label,
+            dim1Value: customSize.dim1.trim(),
+            dim2Label: config.dim2Label,
+            dim2Value: customSize.dim2.trim(),
+            dim3Label: config.dim3Label,
+            dim3Value: customSize.dim3.trim(),
+            unit: customSize.unit,
+            notes: customSize.notes.trim() || undefined,
+            bikeModel: customSize.modelName.trim(),
+            length: customSize.dim1.trim(),
+            width: customSize.dim2.trim(),
+            height: customSize.dim3.trim(),
+          }
+        : undefined,
       variantSummary: getVariantSummary(),
       quantity,
     });
@@ -286,6 +479,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
   const handleBuyNow = () => {
     if (!validateVariants()) return;
 
+    const config =
+      CATEGORY_MEASUREMENT_CONFIGS[product.category] ||
+      CATEGORY_MEASUREMENT_CONFIGS["bike-covers"];
+
     addToCart({
       productId: product.id,
       slug: product.slug,
@@ -297,6 +494,23 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       selectedColor,
       selectedType: selectedMachineType || selectedAcSize || selectedFanType || undefined,
       selectedCapacity: selectedCapacity || selectedUnitType || selectedFanSize || undefined,
+      customMeasurements: isCustomSizeActive
+        ? {
+            productTypeOrModel: customSize.modelName.trim(),
+            dim1Label: config.dim1Label,
+            dim1Value: customSize.dim1.trim(),
+            dim2Label: config.dim2Label,
+            dim2Value: customSize.dim2.trim(),
+            dim3Label: config.dim3Label,
+            dim3Value: customSize.dim3.trim(),
+            unit: customSize.unit,
+            notes: customSize.notes.trim() || undefined,
+            bikeModel: customSize.modelName.trim(),
+            length: customSize.dim1.trim(),
+            width: customSize.dim2.trim(),
+            height: customSize.dim3.trim(),
+          }
+        : undefined,
       variantSummary: getVariantSummary(),
       quantity,
     });
@@ -338,32 +552,49 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
 
     // Dynamic variant lines based on category
     const variantLines: string[] = [];
-    if (product.category === "bike-covers") {
-      variantLines.push(`Bike Model: ${selectedModel}`);
-    } else if (product.category === "washing-machine-covers") {
-      variantLines.push(`Machine Type: ${selectedMachineType}`);
-      variantLines.push(`Capacity: ${selectedCapacity}`);
-    } else if (product.category === "ac-covers") {
-      variantLines.push(`AC Size: ${selectedAcSize}`);
-      variantLines.push(`Unit Type: ${selectedUnitType}`);
-    } else if (product.category === "mattress-covers") {
-      variantLines.push(`Size: ${selectedSize}`);
-    } else if (product.category === "fan-covers") {
-      variantLines.push(`Fan Type: ${selectedFanType}`);
-      variantLines.push(`Size: ${selectedFanSize}`);
-    } else if (product.category === "air-cooler-covers") {
-      variantLines.push(`Size: ${selectedSize}`);
-    } else if (product.category === "rain-dress") {
-      variantLines.push(`Size: ${selectedSize}`);
-    } else if (product.category === "car-covers") {
-      variantLines.push(`Car Size: ${selectedSize}`);
-    } else if (selectedSize) {
-      variantLines.push(`Size: ${selectedSize}`);
-    }
+    const config =
+      CATEGORY_MEASUREMENT_CONFIGS[product.category] ||
+      CATEGORY_MEASUREMENT_CONFIGS["bike-covers"];
 
-    variantLines.push(`Color: ${selectedColor}`);
-    variantLines.push(`Quantity: ${quantity}`);
-    variantLines.push(`Price: Rs. ${(product.price * quantity).toLocaleString()}`);
+    if (isCustomSizeActive) {
+      variantLines.push(`Variant: Custom Size`);
+      variantLines.push(`${config.modelLabel}: ${customSize.modelName.trim()}`);
+      variantLines.push(`Color: ${selectedColor}`);
+      variantLines.push(`${config.dim1Label}: ${customSize.dim1.trim()} ${customSize.unit}`);
+      variantLines.push(`${config.dim2Label}: ${customSize.dim2.trim()} ${customSize.unit}`);
+      variantLines.push(`${config.dim3Label}: ${customSize.dim3.trim()} ${customSize.unit}`);
+      if (customSize.notes.trim()) {
+        variantLines.push(`Additional Notes: ${customSize.notes.trim()}`);
+      }
+      variantLines.push(`Quantity: ${quantity}`);
+      variantLines.push(`Price: Rs. ${(product.price * quantity).toLocaleString()}`);
+    } else {
+      if (product.category === "bike-covers") {
+        variantLines.push(`Bike Model: ${selectedModel}`);
+      } else if (product.category === "washing-machine-covers") {
+        variantLines.push(`Machine Type: ${selectedMachineType}`);
+        variantLines.push(`Capacity: ${selectedCapacity}`);
+      } else if (product.category === "ac-covers") {
+        variantLines.push(`AC Size: ${selectedAcSize}`);
+        variantLines.push(`Unit Type: ${selectedUnitType}`);
+      } else if (product.category === "mattress-covers") {
+        variantLines.push(`Size: ${selectedSize}`);
+      } else if (product.category === "fan-covers") {
+        variantLines.push(`Fan Type: ${selectedFanType}`);
+        variantLines.push(`Size: ${selectedFanSize}`);
+      } else if (product.category === "air-cooler-covers") {
+        variantLines.push(`Size: ${selectedSize}`);
+      } else if (product.category === "rain-dress") {
+        variantLines.push(`Size: ${selectedSize}`);
+      } else if (product.category === "car-covers") {
+        variantLines.push(`Car Size: ${selectedSize}`);
+      } else if (selectedSize) {
+        variantLines.push(`Size: ${selectedSize}`);
+      }
+      variantLines.push(`Color: ${selectedColor}`);
+      variantLines.push(`Quantity: ${quantity}`);
+      variantLines.push(`Price: Rs. ${(product.price * quantity).toLocaleString()}`);
+    }
 
     const messageParts: string[] = [
       "Hi Super Safety Cover,",
@@ -427,6 +658,203 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       ratingValue: product.rating,
       reviewCount: product.reviewsCount,
     },
+  };
+
+  // Render dynamic custom measurement form based on category
+  const renderCustomMeasurementForm = () => {
+    const config =
+      CATEGORY_MEASUREMENT_CONFIGS[product.category] ||
+      CATEGORY_MEASUREMENT_CONFIGS["bike-covers"];
+
+    return (
+      <div className="mt-3.5 p-3.5 sm:p-4 rounded-xl bg-[#FAF9F5] border border-[#D8D2C5]">
+        <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-[#E8E4DA]">
+          <div>
+            <h4 className="text-xs sm:text-sm font-bold text-brand-black flex items-center gap-1.5">
+              <span>Custom Size Measurements</span>
+            </h4>
+            <p className="text-[11px] text-brand-grey mt-0.5">
+              Enter your specifications for a custom made-to-order cover.
+            </p>
+          </div>
+
+          {/* Unit Selector Toggle (Inches / cm) */}
+          <div className="flex items-center gap-1 bg-white border border-[#D8D2C5] p-0.5 rounded-md shrink-0">
+            <button
+              type="button"
+              onClick={() => setCustomSize((prev) => ({ ...prev, unit: "inches" }))}
+              className={`px-2.5 py-1 text-[11px] font-bold rounded transition-colors ${
+                customSize.unit === "inches"
+                  ? "bg-olive text-white shadow-xs"
+                  : "text-brand-grey hover:text-brand-black"
+              }`}
+            >
+              Inches
+            </button>
+            <button
+              type="button"
+              onClick={() => setCustomSize((prev) => ({ ...prev, unit: "cm" }))}
+              className={`px-2.5 py-1 text-[11px] font-bold rounded transition-colors ${
+                customSize.unit === "cm"
+                  ? "bg-olive text-white shadow-xs"
+                  : "text-brand-grey hover:text-brand-black"
+              }`}
+            >
+              cm
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {/* Model / Type Name * */}
+          <div>
+            <label className="block text-[11px] font-bold text-brand-black uppercase tracking-wider mb-1">
+              {config.modelLabel} <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={customSize.modelName}
+              onChange={(e) => {
+                setCustomSize((prev) => ({ ...prev, modelName: e.target.value }));
+                if (customSizeErrors.modelName) {
+                  setCustomSizeErrors((prev) => ({ ...prev, modelName: "" }));
+                }
+                setVariantError("");
+              }}
+              placeholder={config.modelPlaceholder}
+              className={`w-full px-3 py-2 text-xs sm:text-sm rounded-md border bg-white text-brand-black placeholder-gray-400 focus:outline-none transition-colors ${
+                customSizeErrors.modelName
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-brand-lightgrey focus:border-olive"
+              }`}
+            />
+            {customSizeErrors.modelName && (
+              <span className="text-[10px] text-red-500 mt-1 block font-medium">
+                {customSizeErrors.modelName}
+              </span>
+            )}
+          </div>
+
+          {/* 3 Dimension Fields */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            {/* Dim 1 */}
+            <div>
+              <label className="block text-[11px] font-bold text-brand-black uppercase tracking-wider mb-1 truncate">
+                {config.dim1Label} ({customSize.unit}) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={customSize.dim1}
+                onChange={(e) => {
+                  setCustomSize((prev) => ({ ...prev, dim1: e.target.value }));
+                  if (customSizeErrors.dim1) {
+                    setCustomSizeErrors((prev) => ({ ...prev, dim1: "" }));
+                  }
+                  setVariantError("");
+                }}
+                placeholder={
+                  customSize.unit === "inches"
+                    ? config.dim1PlaceholderInches
+                    : config.dim1PlaceholderCm
+                }
+                className={`w-full px-2.5 sm:px-3 py-2 text-xs sm:text-sm rounded-md border bg-white text-brand-black placeholder-gray-400 focus:outline-none transition-colors ${
+                  customSizeErrors.dim1
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-brand-lightgrey focus:border-olive"
+                }`}
+              />
+              {customSizeErrors.dim1 && (
+                <span className="text-[10px] text-red-500 mt-1 block font-medium">
+                  {customSizeErrors.dim1}
+                </span>
+              )}
+            </div>
+
+            {/* Dim 2 */}
+            <div>
+              <label className="block text-[11px] font-bold text-brand-black uppercase tracking-wider mb-1 truncate">
+                {config.dim2Label} ({customSize.unit}) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={customSize.dim2}
+                onChange={(e) => {
+                  setCustomSize((prev) => ({ ...prev, dim2: e.target.value }));
+                  if (customSizeErrors.dim2) {
+                    setCustomSizeErrors((prev) => ({ ...prev, dim2: "" }));
+                  }
+                  setVariantError("");
+                }}
+                placeholder={
+                  customSize.unit === "inches"
+                    ? config.dim2PlaceholderInches
+                    : config.dim2PlaceholderCm
+                }
+                className={`w-full px-2.5 sm:px-3 py-2 text-xs sm:text-sm rounded-md border bg-white text-brand-black placeholder-gray-400 focus:outline-none transition-colors ${
+                  customSizeErrors.dim2
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-brand-lightgrey focus:border-olive"
+                }`}
+              />
+              {customSizeErrors.dim2 && (
+                <span className="text-[10px] text-red-500 mt-1 block font-medium">
+                  {customSizeErrors.dim2}
+                </span>
+              )}
+            </div>
+
+            {/* Dim 3 */}
+            <div>
+              <label className="block text-[11px] font-bold text-brand-black uppercase tracking-wider mb-1 truncate">
+                {config.dim3Label} ({customSize.unit}) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={customSize.dim3}
+                onChange={(e) => {
+                  setCustomSize((prev) => ({ ...prev, dim3: e.target.value }));
+                  if (customSizeErrors.dim3) {
+                    setCustomSizeErrors((prev) => ({ ...prev, dim3: "" }));
+                  }
+                  setVariantError("");
+                }}
+                placeholder={
+                  customSize.unit === "inches"
+                    ? config.dim3PlaceholderInches
+                    : config.dim3PlaceholderCm
+                }
+                className={`w-full px-2.5 sm:px-3 py-2 text-xs sm:text-sm rounded-md border bg-white text-brand-black placeholder-gray-400 focus:outline-none transition-colors ${
+                  customSizeErrors.dim3
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-brand-lightgrey focus:border-olive"
+                }`}
+              />
+              {customSizeErrors.dim3 && (
+                <span className="text-[10px] text-red-500 mt-1 block font-medium">
+                  {customSizeErrors.dim3}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Additional Notes (optional) */}
+          <div>
+            <label className="block text-[11px] font-bold text-brand-black uppercase tracking-wider mb-1">
+              Additional Notes <span className="text-gray-400 font-normal normal-case">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={customSize.notes}
+              onChange={(e) =>
+                setCustomSize((prev) => ({ ...prev, notes: e.target.value }))
+              }
+              placeholder={config.notesPlaceholder}
+              className="w-full px-3 py-2 text-xs sm:text-sm rounded-md border border-brand-lightgrey bg-white text-brand-black placeholder-gray-400 focus:outline-none focus:border-olive transition-colors"
+            />
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -574,6 +1002,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                           if (!isAvailable) return;
                           setSelectedModel(bm.name);
                           setVariantError("");
+                          setCustomSizeErrors({});
                         }}
                         className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
                           !isAvailable
@@ -588,6 +1017,9 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     );
                   })}
                 </div>
+
+                {/* Custom Size Measurement Form (rendered only when Custom Size is selected) */}
+                {selectedModel === "Custom Size" && renderCustomMeasurementForm()}
               </div>
             )}
 
@@ -624,13 +1056,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     Select Capacity <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {["7 - 8 KG", "9 - 10 KG", "11 - 14 KG"].map((cap) => (
+                    {["7 - 8 KG", "9 - 10 KG", "11 - 14 KG", "Custom Size"].map((cap) => (
                       <button
                         key={cap}
                         type="button"
                         onClick={() => {
                           setSelectedCapacity(cap);
                           setVariantError("");
+                          setCustomSizeErrors({});
                         }}
                         className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
                           selectedCapacity === cap
@@ -643,6 +1076,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     ))}
                   </div>
                 </div>
+
+                {selectedCapacity === "Custom Size" && renderCustomMeasurementForm()}
               </div>
             )}
 
@@ -654,13 +1089,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     Select AC Size <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {["1.0 Ton", "1.5 Ton", "2.0 Ton"].map((size) => (
+                    {["1.0 Ton", "1.5 Ton", "2.0 Ton", "Custom Size"].map((size) => (
                       <button
                         key={size}
                         type="button"
                         onClick={() => {
                           setSelectedAcSize(size);
                           setVariantError("");
+                          setCustomSizeErrors({});
                         }}
                         className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
                           selectedAcSize === size
@@ -700,6 +1136,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     )}
                   </div>
                 </div>
+
+                {selectedAcSize === "Custom Size" && renderCustomMeasurementForm()}
               </div>
             )}
 
@@ -710,13 +1148,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                   Select Size <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {["Single Bed", "Queen Size", "King Size"].map((sz) => (
+                  {["Single Bed", "Queen Size", "King Size", "Custom Size"].map((sz) => (
                     <button
                       key={sz}
                       type="button"
                       onClick={() => {
                         setSelectedSize(sz);
                         setVariantError("");
+                        setCustomSizeErrors({});
                       }}
                       className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
                         selectedSize === sz
@@ -728,6 +1167,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     </button>
                   ))}
                 </div>
+
+                {selectedSize === "Custom Size" && renderCustomMeasurementForm()}
               </div>
             )}
 
@@ -764,13 +1205,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     Select Size <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {["Standard 56\"", "Large 60\""].map((s) => (
+                    {["Standard 56\"", "Large 60\"", "Custom Size"].map((s) => (
                       <button
                         key={s}
                         type="button"
                         onClick={() => {
                           setSelectedFanSize(s);
                           setVariantError("");
+                          setCustomSizeErrors({});
                         }}
                         className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
                           selectedFanSize === s
@@ -783,6 +1225,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     ))}
                   </div>
                 </div>
+
+                {selectedFanSize === "Custom Size" && renderCustomMeasurementForm()}
               </div>
             )}
 
@@ -793,13 +1237,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                   Select Size <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {["Medium Room Cooler", "Jumbo / Desert Cooler"].map((sz) => (
+                  {["Medium Room Cooler", "Jumbo / Desert Cooler", "Custom Size"].map((sz) => (
                     <button
                       key={sz}
                       type="button"
                       onClick={() => {
                         setSelectedSize(sz);
                         setVariantError("");
+                        setCustomSizeErrors({});
                       }}
                       className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
                         selectedSize === sz
@@ -811,6 +1256,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     </button>
                   ))}
                 </div>
+
+                {selectedSize === "Custom Size" && renderCustomMeasurementForm()}
               </div>
             )}
 
@@ -821,13 +1268,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                   Select Size <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {["Medium", "Large", "XL", "XXL"].map((sz) => (
+                  {["Medium", "Large", "XL", "XXL", "Custom Size"].map((sz) => (
                     <button
                       key={sz}
                       type="button"
                       onClick={() => {
                         setSelectedSize(sz);
                         setVariantError("");
+                        setCustomSizeErrors({});
                       }}
                       className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
                         selectedSize === sz
@@ -839,6 +1287,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     </button>
                   ))}
                 </div>
+
+                {selectedSize === "Custom Size" && renderCustomMeasurementForm()}
               </div>
             )}
 
@@ -849,13 +1299,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                   Select Body Type / Size <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {["Hatchback", "Sedan", "SUV / Crossover"].map((sz) => (
+                  {["Hatchback", "Sedan", "SUV / Crossover", "Custom Size"].map((sz) => (
                     <button
                       key={sz}
                       type="button"
                       onClick={() => {
                         setSelectedSize(sz);
                         setVariantError("");
+                        setCustomSizeErrors({});
                       }}
                       className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
                         selectedSize === sz
@@ -867,6 +1318,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     </button>
                   ))}
                 </div>
+
+                {selectedSize === "Custom Size" && renderCustomMeasurementForm()}
               </div>
             )}
 
@@ -886,24 +1339,27 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     Select Size <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {product.sizes.map((sz) => (
+                    {[...product.sizes.map((s) => s.name), "Custom Size"].map((szName) => (
                       <button
-                        key={sz.name}
+                        key={szName}
                         type="button"
                         onClick={() => {
-                          setSelectedSize(sz.name);
+                          setSelectedSize(szName);
                           setVariantError("");
+                          setCustomSizeErrors({});
                         }}
                         className={`px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
-                          selectedSize === sz.name
+                          selectedSize === szName
                             ? "bg-olive text-white border-olive shadow-xs"
                             : "bg-white text-brand-black border-brand-lightgrey hover:border-olive"
                         }`}
                       >
-                        {sz.name}
+                        {szName}
                       </button>
                     ))}
                   </div>
+
+                  {selectedSize === "Custom Size" && renderCustomMeasurementForm()}
                 </div>
               )}
 
@@ -930,21 +1386,30 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     <button
                       key={c.name}
                       type="button"
+                      title={c.name}
+                      aria-label={`Select ${c.name} color`}
                       onClick={() => {
                         setSelectedColor(c.name);
                         setVariantError("");
                       }}
-                      className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold border transition-all ${
+                      className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-all ${
                         isSelected
-                          ? "border-olive ring-1 ring-olive text-brand-black bg-olive/5 shadow-xs"
-                          : "border-brand-lightgrey bg-white text-brand-black hover:border-brand-grey"
+                          ? "border-olive ring-2 ring-olive/25 bg-olive-soft/40 text-brand-black shadow-xs"
+                          : "border-brand-lightgrey bg-white text-brand-black hover:border-olive/60"
                       }`}
                     >
                       <span
-                        className="w-3.5 h-3.5 rounded-full border border-black/15 shrink-0 shadow-2xs"
+                        className="relative flex items-center justify-center w-4 h-4 rounded-full border border-black/20 shrink-0 shadow-2xs"
                         style={{ backgroundColor: c.hex }}
-                      />
+                      >
+                        {isSelected && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />
+                        )}
+                      </span>
                       <span>{c.name}</span>
+                      {isSelected && (
+                        <Check className="w-3.5 h-3.5 text-olive shrink-0 ml-0.5" />
+                      )}
                     </button>
                   );
                 })}
@@ -1055,175 +1520,77 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
           </div>
         </div>
 
-        {/* BELOW: Product Description, Features, Specs, Shipping, Reviews (Tabs) */}
-        <div className="mt-16 md:mt-20 pt-8 border-t border-brand-lightgrey">
-          {/* Tab Navigation */}
-          <div className="flex border-b border-brand-lightgrey overflow-x-auto space-x-6 sm:space-x-8 text-xs sm:text-sm font-bold">
-            <button
-              onClick={() => setActiveTab("description")}
-              className={`pb-3 border-b-2 transition-colors shrink-0 ${
-                activeTab === "description"
-                  ? "border-olive text-olive"
-                  : "border-transparent text-brand-grey hover:text-brand-black"
-              }`}
-            >
+        {/* ======================================================= */}
+        {/* 1. PRODUCT DESCRIPTION (Clean direct section, no tabs)  */}
+        {/* ======================================================= */}
+        <section className="mt-12 md:mt-16 pt-8 md:pt-10 border-t border-brand-lightgrey" aria-labelledby="product-description-heading">
+          <div className="max-w-3xl">
+            <h2 id="product-description-heading" className="text-xl sm:text-2xl font-bold text-[#121212] tracking-tight mb-3">
               Product Description
-            </button>
-            <button
-              onClick={() => setActiveTab("features")}
-              className={`pb-3 border-b-2 transition-colors shrink-0 ${
-                activeTab === "features"
-                  ? "border-olive text-olive"
-                  : "border-transparent text-brand-grey hover:text-brand-black"
-              }`}
-            >
-              Key Features
-            </button>
-            <button
-              onClick={() => setActiveTab("specs")}
-              className={`pb-3 border-b-2 transition-colors shrink-0 ${
-                activeTab === "specs"
-                  ? "border-olive text-olive"
-                  : "border-transparent text-brand-grey hover:text-brand-black"
-              }`}
-            >
-              Specifications
-            </button>
-            <button
-              onClick={() => setActiveTab("shipping")}
-              className={`pb-3 border-b-2 transition-colors shrink-0 ${
-                activeTab === "shipping"
-                  ? "border-olive text-olive"
-                  : "border-transparent text-brand-grey hover:text-brand-black"
-              }`}
-            >
-              Shipping & Returns
-            </button>
-            <button
-              onClick={() => setActiveTab("reviews")}
-              className={`pb-3 border-b-2 transition-colors shrink-0 ${
-                activeTab === "reviews"
-                  ? "border-olive text-olive"
-                  : "border-transparent text-brand-grey hover:text-brand-black"
-              }`}
-            >
-              Customer Reviews ({product.reviewsCount})
-            </button>
+            </h2>
+
+            {/* Short product description paragraph (3–4 lines maximum) */}
+            <p className="text-sm sm:text-base text-[#121212] leading-relaxed mb-6">
+              {productDescriptionData.paragraph}
+            </p>
+
+            {/* Heading: KEY POINTS */}
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#66743A] mb-3">
+              KEY POINTS
+            </h3>
+
+            {/* Small concise bullet points */}
+            <ul className="space-y-2 sm:space-y-2.5">
+              {productDescriptionData.bullets.map((bullet, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-start gap-2.5 text-sm sm:text-[15px] text-[#121212] leading-normal"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#66743A] mt-2 shrink-0" aria-hidden="true" />
+                  <span>{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* ======================================================= */}
+        {/* 2. RELATED PRODUCTS (4 items, excluding current)        */}
+        {/* ======================================================= */}
+        <section className="mt-16 md:mt-20 pt-10 border-t border-brand-lightgrey" aria-labelledby="related-products-heading">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-2">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-olive mb-1.5 block">
+                Explore More Protection
+              </span>
+              <h2 id="related-products-heading" className="text-2xl sm:text-3xl font-extrabold text-brand-black tracking-tight">
+                Related Products
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-brand-grey">
+              Frequently paired protective covers across Pakistan
+            </p>
           </div>
 
-          {/* Tab Content */}
-          <div className="py-8 max-w-4xl">
-            {activeTab === "description" && (
-              <div className="prose prose-sm text-brand-grey leading-relaxed space-y-4">
-                <p className="text-base text-brand-black font-medium">
-                  {product.description}
-                </p>
-                <p>
-                  Manufactured under strict quality standards in Pakistan to meet the extreme challenges of local climate conditions. Whether parking in intense sunlight, under dusty trees, or during monsoon cloudbursts, Super Safety Cover preserves the factory finish of your equipment.
-                </p>
-              </div>
-            )}
-
-            {activeTab === "features" && (
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {product.features.map((feat, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2.5 p-3 rounded-lg bg-brand-offwhite border border-brand-lightgrey text-xs sm:text-sm text-brand-black font-medium"
-                  >
-                    <Check className="w-4 h-4 text-olive shrink-0 mt-0.5" />
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {activeTab === "specs" && (
-              <div className="border border-brand-lightgrey rounded-lg overflow-hidden">
-                <table className="w-full text-xs sm:text-sm text-left">
-                  <tbody>
-                    {Object.entries(product.specifications).map(([key, val], idx) => (
-                      <tr
-                        key={key}
-                        className={idx % 2 === 0 ? "bg-brand-offwhite" : "bg-white"}
-                      >
-                        <td className="px-4 py-3 font-bold text-brand-black border-r border-brand-lightgrey w-1/3">
-                          {key}
-                        </td>
-                        <td className="px-4 py-3 text-brand-grey">{val}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {activeTab === "shipping" && (
-              <div className="space-y-4 text-xs sm:text-sm text-brand-grey leading-relaxed">
-                <div className="p-4 rounded-lg bg-brand-offwhite border border-brand-lightgrey space-y-2">
-                  <h4 className="font-bold text-brand-black flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-olive" />
-                    <span>Cash on Delivery Nationwide</span>
-                  </h4>
-                  <p>
-                    All parcels are shipped via tracked express courier (Trax, Leopard, or TCS). Delivery timeline is typically 2 to 4 working days across all major Pakistani cities and tehsils.
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-brand-offwhite border border-brand-lightgrey space-y-2">
-                  <h4 className="font-bold text-brand-black flex items-center gap-2">
-                    <RotateCcw className="w-4 h-4 text-olive" />
-                    <span>7-Day Return & Exchange Policy</span>
-                  </h4>
-                  <p>
-                    If the cover does not fit your motorcycle or appliance, we provide a smooth exchange or 100% refund. Simply message our WhatsApp support desk at +92 328 8985916.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "reviews" && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-brand-offwhite border border-brand-lightgrey mb-6">
-                  <div className="text-3xl font-extrabold text-brand-black">
-                    {product.rating.toFixed(1)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1 text-olive">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-xs text-brand-grey">
-                      Based on {product.reviewsCount} verified customer ratings
-                    </span>
-                  </div>
-                </div>
-
-                {/* Example review */}
-                <div className="p-4 rounded-lg border border-brand-lightgrey space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs sm:text-sm text-brand-black">
-                        Adeel Khan
-                      </span>
-                      <span className="text-[11px] text-olive font-semibold bg-olive-soft px-2 py-0.5 rounded">
-                        Verified Purchase
-                      </span>
-                    </div>
-                    <span className="text-xs text-brand-grey">3 days ago</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-olive">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-xs sm:text-sm text-brand-grey leading-relaxed">
-                    Fabric quality is truly superior compared to generic market parachute. Water beads right off and under-clip stops it from flying away in high winds.
-                  </p>
-                </div>
-              </div>
-            )}
+          {/* Responsive Grid: Desktop 4 cards, Tablet 2-3 cards, Mobile 2 cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {relatedProducts.map((relProduct) => (
+              <ProductCard key={relProduct.id} product={relProduct} />
+            ))}
           </div>
+        </section>
+
+        {/* ======================================================= */}
+        {/* 3. CUSTOMER REVIEWS (Clean responsive carousel)          */}
+        {/* ======================================================= */}
+        <div className="mt-16 md:mt-20 -mx-4 sm:-mx-6 lg:-mx-8">
+          <CustomerReviews
+            title="Customer Reviews"
+            badge="Verified Feedback"
+            subtitle={`What customers across Pakistan say about our protective covers`}
+            bgClassName="bg-[#F4F3ED]"
+            categoryFilter={product.category}
+          />
         </div>
       </div>
 
@@ -1276,7 +1643,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
               {/* Full Name */}
               <div>
                 <label className="block text-xs font-bold text-brand-black mb-1">
-                  Full Name <span className="text-red-500">*</span>
+                  Full Name (مکمل نام) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1302,7 +1669,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
               {/* Phone Number */}
               <div>
                 <label className="block text-xs font-bold text-brand-black mb-1">
-                  Phone Number <span className="text-red-500">*</span>
+                  Phone Number (فون نمبر) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -1328,7 +1695,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
               {/* City */}
               <div>
                 <label className="block text-xs font-bold text-brand-black mb-1">
-                  City <span className="text-red-500">*</span>
+                  City (شہر) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1354,7 +1721,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
               {/* Delivery Address */}
               <div>
                 <label className="block text-xs font-bold text-brand-black mb-1">
-                  Delivery Address <span className="text-red-500">*</span>
+                  Delivery Address (ڈیلیوری ایڈریس) <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   rows={2}
@@ -1380,7 +1747,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
               {/* Order Notes (optional) */}
               <div>
                 <label className="block text-xs font-bold text-brand-black mb-1">
-                  Order Notes <span className="text-brand-grey font-normal">(optional)</span>
+                  Order Notes (آرڈر نوٹس) <span className="text-brand-grey font-normal">(Optional)</span>
                 </label>
                 <textarea
                   rows={2}

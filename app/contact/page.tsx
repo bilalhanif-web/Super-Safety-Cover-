@@ -1,263 +1,213 @@
-"use client";
-
-import React, { useState } from "react";
+import { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { MessageCircle, Phone, Mail, Clock, MapPin, CheckCircle2, Send, Facebook } from "lucide-react";
+import {
+  MessageCircle,
+  Facebook,
+  Instagram,
+  Mail,
+  ArrowUpRight,
+  Clock,
+  Truck,
+  ShieldCheck,
+} from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Contact Us | Super Safety Cover Pakistan",
+  description:
+    "Connect with Super Safety Cover. Direct support via WhatsApp, Facebook, Instagram, TikTok, and Email for sizing advice, custom covers, and order inquiries.",
+};
+
+const TikTokIcon: React.FC<{ className?: string }> = ({
+  className = "w-6 h-6",
+}) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743 2.895 2.895 0 0 1 2.31-4.644c.314 0 .619.05 1.053.167V9.402c-.347-.046-.7-.07-1.053-.07A6.335 6.335 0 0 0 3.15 15.666 6.337 6.337 0 0 0 9.484 22a6.333 6.333 0 0 0 6.334-6.334V9.22a8.163 8.163 0 0 0 4.771 1.517V7.292a4.78 4.78 0 0 1-1-.606z" />
+  </svg>
+);
+
+interface ConnectChannel {
+  name: string;
+  badge: string;
+  badgeHighlight?: boolean;
+  handleOrValue: string;
+  description: string;
+  href: string;
+  actionText: string;
+  icon: React.ReactNode;
+  colSpan?: string;
+}
+
+const CONNECT_CHANNELS: ConnectChannel[] = [
+  {
+    name: "WhatsApp",
+    badge: "Fastest Response",
+    badgeHighlight: true,
+    handleOrValue: "+92 328 8985916",
+    description:
+      "Instant messaging for bike sizing recommendations, custom measurements, and live order tracking.",
+    href: "https://wa.me/923288985916",
+    actionText: "Chat on WhatsApp",
+    icon: <MessageCircle className="w-6 h-6 stroke-[1.8]" />,
+  },
+  {
+    name: "Facebook",
+    badge: "Official Page",
+    handleOrValue: "Super Safety Covers",
+    description:
+      "Follow our official page for product demonstrations, customer reviews, photo galleries, and news.",
+    href: "https://www.facebook.com/share/19Kk5K8U7j/",
+    actionText: "Visit Facebook Page",
+    icon: <Facebook className="w-6 h-6 stroke-[1.8]" />,
+  },
+  {
+    name: "Instagram",
+    badge: "Photos & Reels",
+    handleOrValue: "@supersafetycover",
+    description:
+      "Explore cover fitting showcases, water resistance tests, behind-the-scenes clips, and customer reels.",
+    href: "https://www.instagram.com/supersafetycover/",
+    actionText: "Follow on Instagram",
+    icon: <Instagram className="w-6 h-6 stroke-[1.8]" />,
+  },
+  {
+    name: "TikTok",
+    badge: "Video Demos",
+    handleOrValue: "@supersafetycover",
+    description:
+      "Watch short video tutorials, real fabric durability trials, monsoon water tests, and cover reviews.",
+    href: "https://www.tiktok.com/@supersafetycover",
+    actionText: "Watch on TikTok",
+    icon: <TikTokIcon className="w-6 h-6" />,
+  },
+  {
+    name: "Email Support",
+    badge: "Formal Inquiries",
+    handleOrValue: "support@supersafetycover.com",
+    description:
+      "Ideal for bulk institutional orders, dealership inquiries, corporate partnerships, and formal feedback.",
+    href: "mailto:support@supersafetycover.com",
+    actionText: "Send an Email",
+    icon: <Mail className="w-6 h-6 stroke-[1.8]" />,
+    colSpan: "md:col-span-2",
+  },
+];
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    message: "",
-  });
-
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
   return (
-    <div className="bg-white min-h-screen pb-16">
+    <div className="bg-[#F4F3ED] min-h-screen pb-16">
       <Breadcrumbs items={[{ label: "Contact Us" }]} />
 
-      {/* Header */}
-      <div className="bg-brand-offwhite border-y border-brand-lightgrey py-10 md:py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="text-xs font-bold uppercase tracking-wider text-olive mb-1.5 block">
-            Customer Support & Inquiries
+      {/* Header Banner */}
+      <div className="bg-[#F4F3ED] border-b border-[#D8D2C5] py-10 md:py-14">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#66743A]/10 text-[#66743A] mb-3">
+            Customer Support & Assistance
           </span>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-brand-black tracking-tight mb-2">
-            Contact Us
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#121212] tracking-tight mb-3">
+            Connect With Us
           </h1>
-          <p className="text-sm sm:text-base text-brand-grey max-w-2xl leading-relaxed">
-            Have questions about bike sizing, custom covers, or tracking your Cash on Delivery parcel? Our team is available 6 days a week.
+          <p className="text-sm sm:text-base text-[#5A5A55] max-w-2xl mx-auto leading-relaxed">
+            Have questions about vehicle sizing, custom measurements, or order delivery? Reach out directly through any of our channels below. Our team is available 6 days a week.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
-          {/* Contact Details (5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
-            <h2 className="text-xl font-bold text-brand-black">
-              Get in Touch
-            </h2>
-            <p className="text-sm text-brand-grey leading-relaxed">
-              We respond promptly during business hours. For immediate assistance with ongoing orders, WhatsApp is our quickest channel.
-            </p>
+      {/* Main Connect Grid */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+          {CONNECT_CHANNELS.map((item, index) => (
+            <a
+              key={index}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`bg-white rounded-2xl border border-[#D8D2C5] p-6 sm:p-7 shadow-xs hover:border-[#66743A] hover:shadow-md transition-all duration-200 group flex flex-col justify-between ${
+                item.colSpan || ""
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#66743A]/10 text-[#66743A] flex items-center justify-center group-hover:bg-[#66743A] group-hover:text-white transition-colors duration-200 shrink-0">
+                    {item.icon}
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase ${
+                      item.badgeHighlight
+                        ? "bg-[#66743A]/15 text-[#66743A]"
+                        : "bg-[#F4F3ED] text-[#5A5A55]"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                </div>
 
-            <div className="space-y-4">
-              {/* WhatsApp */}
-              <a
-                href="https://wa.me/923288985916"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-3.5 p-4 rounded-lg bg-brand-offwhite border border-brand-lightgrey hover:border-olive transition-colors group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-white border border-brand-lightgrey flex items-center justify-center text-olive shrink-0 group-hover:bg-olive group-hover:text-white transition-colors">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-grey block">
-                    WhatsApp Chat
-                  </span>
-                  <span className="text-sm font-bold text-brand-black">
-                    +92 328 8985916
-                  </span>
-                  <p className="text-xs text-brand-grey mt-0.5">
-                    Fastest response for sizing advice & order status
-                  </p>
-                </div>
-              </a>
-
-              {/* Phone */}
-              <a
-                href="tel:+923288985916"
-                className="flex items-start gap-3.5 p-4 rounded-lg bg-brand-offwhite border border-brand-lightgrey hover:border-olive transition-colors group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-white border border-brand-lightgrey flex items-center justify-center text-olive shrink-0 group-hover:bg-olive group-hover:text-white transition-colors">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-grey block">
-                    Phone Support
-                  </span>
-                  <span className="text-sm font-bold text-brand-black">
-                    +92 328 8985916
-                  </span>
-                  <p className="text-xs text-brand-grey mt-0.5">
-                    Click to call during business hours
-                  </p>
-                </div>
-              </a>
-
-              {/* Facebook */}
-              <a
-                href="https://www.facebook.com/share/19Kk5K8U7j/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-3.5 p-4 rounded-lg bg-brand-offwhite border border-brand-lightgrey hover:border-olive transition-colors group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-white border border-brand-lightgrey flex items-center justify-center text-olive shrink-0 group-hover:bg-olive group-hover:text-white transition-colors">
-                  <Facebook className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-grey block">
-                    Facebook Page
-                  </span>
-                  <span className="text-sm font-bold text-brand-black">
-                    Super Safety Covers
-                  </span>
-                  <p className="text-xs text-brand-grey mt-0.5">
-                    Follow us on Facebook for demos & reviews
-                  </p>
-                </div>
-              </a>
-
-              {/* Email */}
-              <div className="flex items-start gap-3.5 p-4 rounded-lg bg-brand-offwhite border border-brand-lightgrey">
-                <div className="w-10 h-10 rounded-lg bg-white border border-brand-lightgrey flex items-center justify-center text-olive shrink-0">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-grey block">
-                    Email
-                  </span>
-                  <span className="text-sm font-bold text-brand-black">
-                    support@supersafetycover.com
-                  </span>
-                  <p className="text-xs text-brand-grey mt-0.5">
-                    For bulk orders & corporate inquiries
-                  </p>
-                </div>
+                <h2 className="text-lg font-extrabold text-[#121212] tracking-tight mb-1">
+                  {item.name}
+                </h2>
+                <p className="text-sm sm:text-base font-bold text-[#66743A] mb-2 break-all">
+                  {item.handleOrValue}
+                </p>
+                <p className="text-xs sm:text-sm text-[#5A5A55] leading-relaxed">
+                  {item.description}
+                </p>
               </div>
 
-              {/* Business Hours */}
-              <div className="flex items-start gap-3.5 p-4 rounded-lg bg-brand-offwhite border border-brand-lightgrey">
-                <div className="w-10 h-10 rounded-lg bg-white border border-brand-lightgrey flex items-center justify-center text-olive shrink-0">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-grey block">
-                    Business Hours
-                  </span>
-                  <span className="text-sm font-bold text-brand-black block">
-                    Monday – Saturday: 9:00 AM – 8:00 PM
-                  </span>
-                  <span className="text-xs text-brand-grey">
-                    Sunday: Closed (WhatsApp messages queued)
-                  </span>
-                </div>
+              <div className="pt-5 mt-5 border-t border-[#F4F3ED] flex items-center justify-between text-xs font-bold text-[#66743A] group-hover:text-[#566230]">
+                <span>{item.actionText}</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* Working Hours & Trust Strip */}
+        <div className="mt-8 bg-white rounded-2xl border border-[#D8D2C5] p-6 sm:p-7 shadow-xs">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
+            <div className="flex items-center gap-3.5 justify-center md:justify-start">
+              <div className="w-10 h-10 rounded-xl bg-[#66743A]/10 text-[#66743A] flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5 stroke-[1.8]" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#121212]">
+                  Working Hours
+                </h3>
+                <p className="text-xs text-[#5A5A55] mt-0.5">
+                  Mon – Sat: 9:00 AM – 8:00 PM
+                </p>
               </div>
             </div>
-          </div>
 
-          {/* Contact Form (7 cols) */}
-          <div className="lg:col-span-7">
-            <div className="bg-brand-offwhite p-6 sm:p-10 rounded-2xl border border-brand-lightgrey">
-              <h3 className="text-lg font-bold text-brand-black mb-1">
-                Send Us a Message
-              </h3>
-              <p className="text-xs sm:text-sm text-brand-grey mb-6">
-                Fill in the form below and we will get back to you within 24 hours.
-              </p>
+            <div className="flex items-center gap-3.5 justify-center md:justify-start">
+              <div className="w-10 h-10 rounded-xl bg-[#66743A]/10 text-[#66743A] flex items-center justify-center shrink-0">
+                <Truck className="w-5 h-5 stroke-[1.8]" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#121212]">
+                  Nationwide Delivery
+                </h3>
+                <p className="text-xs text-[#5A5A55] mt-0.5">
+                  Cash on Delivery across Pakistan
+                </p>
+              </div>
+            </div>
 
-              {submitted ? (
-                <div className="bg-white p-6 rounded-lg border border-brand-lightgrey text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-olive-soft text-olive mx-auto flex items-center justify-center">
-                    <CheckCircle2 className="w-6 h-6" />
-                  </div>
-                  <h4 className="text-base font-bold text-brand-black">
-                    Message Sent Successfully!
-                  </h4>
-                  <p className="text-xs text-brand-grey leading-relaxed">
-                    Thank you, {formData.name}. Our customer care team has received your query and will reply via SMS or WhatsApp shortly.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSubmitted(false);
-                      setFormData({ name: "", phone: "", email: "", message: "" });
-                    }}
-                    className="text-xs font-bold text-olive hover:underline pt-2 block mx-auto"
-                  >
-                    Send another message
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="contact-name" className="block text-xs font-bold text-brand-black mb-1.5">
-                      Your Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="contact-name"
-                      type="text"
-                      required
-                      placeholder="e.g. Tariq Mehmood"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-md border border-brand-lightgrey bg-white text-xs sm:text-sm text-brand-black outline-none focus:border-olive"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="contact-phone" className="block text-xs font-bold text-brand-black mb-1.5">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        id="contact-phone"
-                        type="tel"
-                        required
-                        placeholder="03001234567"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-md border border-brand-lightgrey bg-white text-xs sm:text-sm text-brand-black outline-none focus:border-olive"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="contact-email" className="block text-xs font-bold text-brand-black mb-1.5">
-                        Email Address <span className="text-brand-grey font-normal">(Optional)</span>
-                      </label>
-                      <input
-                        id="contact-email"
-                        type="email"
-                        placeholder="name@example.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-md border border-brand-lightgrey bg-white text-xs sm:text-sm text-brand-black outline-none focus:border-olive"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="contact-message" className="block text-xs font-bold text-brand-black mb-1.5">
-                      Message <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      id="contact-message"
-                      required
-                      rows={4}
-                      placeholder="Tell us about the bike model or product query you need assistance with..."
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-md border border-brand-lightgrey bg-white text-xs sm:text-sm text-brand-black outline-none focus:border-olive"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-3.5 px-6 rounded-md bg-olive text-white font-bold text-xs sm:text-sm hover:bg-olive-hover transition-colors flex items-center justify-center gap-2 shadow-sm"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Send Message</span>
-                  </button>
-                </form>
-              )}
+            <div className="flex items-center gap-3.5 justify-center md:justify-start">
+              <div className="w-10 h-10 rounded-xl bg-[#66743A]/10 text-[#66743A] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 stroke-[1.8]" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#121212]">
+                  Reliable Care
+                </h3>
+                <p className="text-xs text-[#5A5A55] mt-0.5">
+                  Direct manufacturer warranty & support
+                </p>
+              </div>
             </div>
           </div>
         </div>

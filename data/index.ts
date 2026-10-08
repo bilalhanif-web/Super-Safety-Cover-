@@ -107,7 +107,7 @@ export const PRODUCTS: Product[] = [
       "Suzuki GR 150",
     ],
     images: [
-      "/images/products/bike-cover.webp",
+      "/images/products/bike-cover-image.webp",
     ],
     price: 1499,
     compareAtPrice: 1999,
@@ -195,9 +195,6 @@ export const PRODUCTS: Product[] = [
     categoryName: "AC Covers",
     images: [
       "/images/products/ac-cover.webp",
-      "/images/products/ac-cover-1.webp",
-      "/images/products/ac-cover-detail-1.webp",
-      "/images/products/ac-cover-detail-2.webp",
     ],
     price: 1299,
     compareAtPrice: 1799,
@@ -460,7 +457,7 @@ export const REVIEWS: CustomerReview[] = [
     date: "2 days ago",
     verifiedPurchase: true,
     productName: "Honda CD 70 Waterproof Bike Cover",
-    productImage: "/images/products/bike-cover.webp",
+    productImage: "/images/products/bike-cover-image.webp",
     language: "en",
   },
   {
@@ -472,7 +469,7 @@ export const REVIEWS: CustomerReview[] = [
     date: "3 days ago",
     verifiedPurchase: true,
     productName: "Yamaha YBR 125 Bike Cover",
-    productImage: "/images/products/bike-cover.webp",
+    productImage: "/images/products/bike-cover-image.webp",
     language: "ur",
   },
   {

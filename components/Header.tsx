@@ -24,9 +24,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAccount }) =
   const pathname = usePathname();
   const { totalQuantity, setIsCartOpen } = useCart();
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const megaMenuContainerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -37,10 +38,40 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAccount }) =
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mega menu on route change
+  useEffect(() => {
+    setMegaMenuOpen(false);
+  }, [pathname]);
+
+  // Close mega menu on click outside or escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setMegaMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMegaMenuOpen(false);
+      }
+    };
+    if (megaMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [megaMenuOpen]);
+
   const handleMouseEnter = () => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
+    }
+    if (!megaMenuOpen) {
+      setResetKey((k) => k + 1);
     }
     setMegaMenuOpen(true);
   };
@@ -48,7 +79,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAccount }) =
   const handleMouseLeave = () => {
     closeTimeoutRef.current = setTimeout(() => {
       setMegaMenuOpen(false);
-    }, 120);
+    }, 300);
+  };
+
+  const handleShopCoversClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setMegaMenuOpen((prev) => {
+      if (!prev) {
+        setResetKey((k) => k + 1);
+        return true;
+      }
+      return false;
+    });
   };
 
   const isShopActive =
@@ -60,6 +106,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAccount }) =
   return (
     <>
       <header
+        ref={headerRef}
         className={`sticky top-0 z-40 bg-white border-b border-[#D8D2C5] transition-shadow ${
           isScrolled ? "shadow-sm" : ""
         }`}
@@ -97,14 +144,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAccount }) =
 
               {/* 2. Shop Covers ▼ (Mega Menu Trigger) */}
               <div
-                ref={megaMenuContainerRef}
                 className="relative py-2"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
                 <button
                   type="button"
-                  onClick={() => setMegaMenuOpen(!megaMenuOpen)}
+                  onClick={handleShopCoversClick}
                   className={`inline-flex items-center gap-1 transition-colors hover:text-olive ${
                     isShopActive ? "text-olive font-bold" : ""
                   }`}
@@ -199,6 +245,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAccount }) =
           <ShopCoversMegaMenu
             isOpen={megaMenuOpen}
             onClose={() => setMegaMenuOpen(false)}
+            resetKey={resetKey}
           />
         </div>
       </header>
